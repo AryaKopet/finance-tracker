@@ -1,8 +1,7 @@
 # 🧾 Finance Tracker
 
 <p align="center">
-  <img src="https://www.python.org/static/community_logos/python-logo.png" alt="Python" width="120"/>
-  <img src="https://flask.palletsprojects.com/en/stable/_images/flask-logo.png" alt="Flask" width="100"/>
+  ![My Skills](https://skillicons.dev/icons?i=typescript&theme=dark).
 </p>
 
 ## 📌 Tentang Projek
