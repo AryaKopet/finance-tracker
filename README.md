@@ -17,8 +17,8 @@ Sistem ini mendukung pencatatan pemasukan maupun pengeluaran, serta menyediakan 
 ## 🛠️ Teknologi yang Digunakan
 - **Backend** : [Flask](https://flask.palletsprojects.com/)  
 - **Frontend** : [Tailwind CSS](https://tailwindcss.com/) + [Lucide Icons](https://lucide.dev/)  
-- **Database** : SQLite / PostgreSQL (via SQLAlchemy ORM)  
-- **Bahasa Pemrograman** : Python 3  
+- **Database** : SQLite (via SQLAlchemy ORM)  
+- **Bahasa Pemrograman** : Python 3.12.4  
 
 ## 🚀 Cara Menjalankan
 1. **Clone repository**
