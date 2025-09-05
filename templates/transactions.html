@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transaksi | Finance Tracker</title>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='favicon.png') }}"
+      type="image/png"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      .progress-bar {
+        height: 4px;
+        width: 0%;
+        animation: loadBar 2s forwards;
+      }
+      @keyframes loadBar {
+        to {
+          width: 100%;
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .menu-item {
+        transition: all 0.3s ease;
+      }
+      .menu-item:hover {
+        background-color: #374151;
+        transform: translateX(5px);
+      }
+      .sidebar-transition {
+        transition: transform 0.3s ease-in-out;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="w-64 bg-gray-900 text-white flex flex-col p-6 fixed h-full sidebar-transition"
+      >
+        <div
+          class="flex items-center gap-3 mb-8 cursor-pointer"
+          onclick="window.location.href='/dashboard'"
+        >
+          <img
+            src="{{ url_for('static', filename='favicon.png') }}"
+            alt="Logo"
+            class="w-10 h-10 rounded-full"
+          />
+          <h2 class="text-xl font-bold tracking-wide">Finance Tracker</h2>
+        </div>
+        <nav class="flex flex-col gap-3 text-sm">
+          <a
+            href="/dashboard"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3"
+          >
+            <i data-lucide="home"></i> Dashboard
+          </a>
+          <a
+            href="/transactions"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3 bg-gray-700"
+          >
+            <i data-lucide="wallet"></i> Transaksi
+          </a>
+          <a
+            href="#"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3"
+          >
+            <i data-lucide="settings"></i> Pengaturan
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main
+        id="mainContent"
+        class="flex-1 flex flex-col transition-all duration-300 ml-64"
+      >
+        <!-- Header -->
+        <header
+          class="flex justify-between items-center bg-white shadow px-6 py-4 relative"
+        >
+          <!-- Sidebar Toggle Button -->
+          <button
+            id="sidebarToggle"
+            class="lg:hidden flex items-center text-gray-700 hover:text-green-600 transition absolute left-4"
+          >
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+
+          <!-- Page Title (centered if needed) -->
+          <h1 class="mx-auto text-lg font-bold text-gray-800">
+            Dashboard Finance Tracker
+          </h1>
+
+          <!-- Avatar (always right-aligned) -->
+          <div class="relative">
+            <button
+              id="avatarBtn"
+              class="w-10 h-10 bg-green-600 text-white font-bold rounded-full flex items-center justify-center overflow-hidden"
+            >
+              {% if user_image %}
+              <img
+                src="{{ url_for('static', filename=user_image) }}"
+                alt="Avatar"
+                class="w-full h-full object-cover"
+              />
+              {% else %} {{ username[:1]|upper }} {% endif %}
+            </button>
+            <div
+              id="dropdownMenu"
+              class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg hidden"
+            >
+              <a
+                href="/profile"
+                class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-gray-700"
+              >
+                <i data-lucide="user" class="w-4 h-4"></i> Profil
+              </a>
+              <a
+                href="{{ url_for('logout') }}"
+                class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-red-500"
+              >
+                <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <!-- Content -->
+        <div class="flex-1 p-8 overflow-y-auto">
+          <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Transaksi</h1>
+            <a
+              href="{{ url_for('transaction.add_transaction') }}"
+              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              + Tambah Transaksi
+            </a>
+          </div>
+
+          <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="w-full border-collapse">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="px-4 py-2 text-left">Tanggal</th>
+                  <th class="px-4 py-2 text-left">Jenis</th>
+                  <th class="px-4 py-2 text-left">Nominal</th>
+                  <th class="px-4 py-2 text-left">Deskripsi</th>
+                  <th class="px-4 py-2 text-left">Bukti</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for trx in transactions %}
+                <tr class="border-t">
+                  <td class="px-4 py-2">{{ trx.date.strftime('%d-%m-%Y') }}</td>
+                  <td class="px-4 py-2">
+                    <span
+                      class="{% if trx.type == 'income' %}text-green-600{% else %}text-red-600{% endif %} font-semibold"
+                    >
+                      {{ 'Pemasukan' if trx.type == 'income' else 'Pengeluaran'
+                      }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2">
+                    Rp {{ "{:,.0f}".format(trx.amount) }}
+                  </td>
+                  <td class="px-4 py-2">{{ trx.description }}</td>
+                  <td class="px-4 py-2">
+                    {% if trx.proof_file %}
+                    <a
+                      href="{{ url_for('transaction.uploaded_file', filename=trx.proof_file) }}"
+                      target="_blank"
+                      class="text-blue-600 underline"
+                      >Lihat</a
+                    >
+                    {% else %}
+                    <span class="text-gray-400">-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Avatar dropdown toggle
+      const avatarBtn = document.getElementById("avatarBtn");
+      const dropdownMenu = document.getElementById("dropdownMenu");
+      avatarBtn.addEventListener("click", () => {
+        dropdownMenu.classList.toggle("hidden");
+      });
+
+      // Sidebar toggle
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("-translate-x-64");
+        mainContent.classList.toggle("ml-64");
+      });
+
+      // Load Lucide icons
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
