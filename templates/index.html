@@ -13,6 +13,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+      body {
+        overflow-x: hidden; /* hilangkan scroll kiri-kanan */
+      }
       .progress-bar {
         height: 4px;
         width: 0%;
@@ -49,11 +52,11 @@
     </style>
   </head>
   <body class="bg-gray-100">
-    <div class="flex h-screen">
+    <div class="flex h-screen overflow-hidden">
       <!-- Sidebar -->
       <aside
         id="sidebar"
-        class="w-64 bg-gray-900 text-white flex flex-col p-6 fixed h-full sidebar-transition"
+        class="w-64 bg-gray-900 text-white flex flex-col p-6 fixed h-full z-40 sidebar-transition transform -translate-x-64 lg:translate-x-0"
       >
         <div
           class="flex items-center gap-3 mb-8 cursor-pointer"
@@ -88,29 +91,31 @@
         </nav>
       </aside>
 
+      <!-- Backdrop (mobile only) -->
+      <div
+        id="backdrop"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-30 lg:hidden"
+      ></div>
+
       <!-- Main Content -->
-      <main
-        id="mainContent"
-        class="flex-1 flex flex-col transition-all duration-300 ml-64"
-      >
+      <main id="mainContent" class="flex-1 flex flex-col transition-all duration-300 lg:ml-64">
         <!-- Header -->
         <header
           class="flex justify-between items-center bg-white shadow px-6 py-4 relative"
         >
-          <!-- Sidebar Toggle Button -->
+          <!-- Sidebar Toggle Button (mobile only) -->
           <button
             id="sidebarToggle"
-            class="flex items-center text-gray-700 hover:text-green-600 transition absolute left-4"
+            class="lg:hidden flex items-center text-gray-700 hover:text-green-600 transition absolute left-4"
           >
             <i data-lucide="menu" class="w-6 h-6"></i>
           </button>
 
-          <!-- Page Title (centered if needed) -->
           <h1 class="mx-auto text-lg font-bold text-gray-800">
             Dashboard Finance Tracker
           </h1>
 
-          <!-- Avatar (always right-aligned) -->
+          <!-- Avatar -->
           <div class="relative">
             <button
               id="avatarBtn"
@@ -154,7 +159,7 @@
           </p>
 
           <!-- Filter Card -->
-          <div class="bg-white shadow-md rounded-lg p-6 mb-6 mt-10">
+          <div class="bg-white shadow-md rounded-lg p-4 mb-6 mt-6">
             <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
               <i data-lucide="filter" class="w-5 h-5 text-green-600"></i> Filter Transaksi
             </h3>
@@ -293,11 +298,18 @@
 
       // Sidebar toggle
       const sidebar = document.getElementById("sidebar");
-      const mainContent = document.getElementById("mainContent");
+      const backdrop = document.getElementById("backdrop");
       const sidebarToggle = document.getElementById("sidebarToggle");
+
       sidebarToggle.addEventListener("click", () => {
         sidebar.classList.toggle("-translate-x-64");
-        mainContent.classList.toggle("ml-64");
+        backdrop.classList.toggle("hidden");
+      });
+
+      // Klik backdrop untuk menutup sidebar
+      backdrop.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-64");
+        backdrop.classList.add("hidden");
       });
 
       // Load Lucide icons

@@ -12,28 +12,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-      .progress-bar {
-        height: 4px;
-        width: 0%;
-        animation: loadBar 2s forwards;
-      }
-      @keyframes loadBar {
-        to {
-          width: 100%;
-        }
-      }
-      .fade-in {
-        animation: fadeIn 0.5s ease-in-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+      body {
+        overflow-x: hidden; /* Hilangkan scroll horizontal pada body */
       }
       .menu-item {
         transition: all 0.3s ease;
@@ -48,11 +28,11 @@
     </style>
   </head>
   <body class="bg-gray-100">
-    <div class="flex h-screen">
+    <div class="flex h-screen overflow-hidden">
       <!-- Sidebar -->
       <aside
         id="sidebar"
-        class="w-64 bg-gray-900 text-white flex flex-col p-6 fixed h-full sidebar-transition"
+        class="w-64 bg-gray-900 text-white flex flex-col p-6 fixed h-full z-40 sidebar-transition transform -translate-x-64 lg:translate-x-0"
       >
         <div
           class="flex items-center gap-3 mb-8 cursor-pointer"
@@ -74,7 +54,7 @@
           </a>
           <a
             href="/transactions"
-            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3 bg-gray-700"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3 bg-gray-800"
           >
             <i data-lucide="wallet"></i> Transaksi
           </a>
@@ -87,16 +67,22 @@
         </nav>
       </aside>
 
+      <!-- Backdrop (mobile only) -->
+      <div
+        id="backdrop"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-30 lg:hidden"
+      ></div>
+
       <!-- Main Content -->
       <main
         id="mainContent"
-        class="flex-1 flex flex-col transition-all duration-300 ml-64"
+        class="flex-1 flex flex-col transition-all duration-300 lg:ml-64"
       >
         <!-- Header -->
         <header
           class="flex justify-between items-center bg-white shadow px-6 py-4 relative"
         >
-          <!-- Sidebar Toggle Button -->
+          <!-- Sidebar Toggle Button (mobile only) -->
           <button
             id="sidebarToggle"
             class="lg:hidden flex items-center text-gray-700 hover:text-green-600 transition absolute left-4"
@@ -104,12 +90,11 @@
             <i data-lucide="menu" class="w-6 h-6"></i>
           </button>
 
-          <!-- Page Title (centered if needed) -->
           <h1 class="mx-auto text-lg font-bold text-gray-800">
             Dashboard Finance Tracker
           </h1>
 
-          <!-- Avatar (always right-aligned) -->
+          <!-- Avatar -->
           <div class="relative">
             <button
               id="avatarBtn"
@@ -155,49 +140,88 @@
             </a>
           </div>
 
-          <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <table class="w-full border-collapse">
-              <thead class="bg-gray-100">
-                <tr>
-                  <th class="px-4 py-2 text-left">Tanggal</th>
-                  <th class="px-4 py-2 text-left">Jenis</th>
-                  <th class="px-4 py-2 text-left">Nominal</th>
-                  <th class="px-4 py-2 text-left">Deskripsi</th>
-                  <th class="px-4 py-2 text-left">Bukti</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for trx in transactions %}
-                <tr class="border-t">
-                  <td class="px-4 py-2">{{ trx.date.strftime('%d-%m-%Y') }}</td>
-                  <td class="px-4 py-2">
-                    <span
-                      class="{% if trx.type == 'income' %}text-green-600{% else %}text-red-600{% endif %} font-semibold"
+          <!-- Table Card -->
+          <div class="bg-white shadow-md rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm text-left">
+                <thead class="bg-gray-50 border-b">
+                  <tr>
+                    <th
+                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
                     >
-                      {{ 'Pemasukan' if trx.type == 'income' else 'Pengeluaran'
-                      }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-2">
-                    Rp {{ "{:,.0f}".format(trx.amount) }}
-                  </td>
-                  <td class="px-4 py-2">{{ trx.description }}</td>
-                  <td class="px-4 py-2">
-                    {% if trx.proof_file %}
-                    <a
-                      href="{{ url_for('transaction.uploaded_file', filename=trx.proof_file) }}"
-                      target="_blank"
-                      class="text-blue-600 underline"
-                      >Lihat</a
+                      Tanggal
+                    </th>
+                    <th
+                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
                     >
-                    {% else %}
-                    <span class="text-gray-400">-</span>
-                    {% endif %}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                      Jenis
+                    </th>
+                    <th
+                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
+                    >
+                      Nominal
+                    </th>
+                    <th
+                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
+                    >
+                      Deskripsi
+                    </th>
+                    <th
+                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
+                    >
+                      Bukti
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  {% for trx in transactions %}
+                  <tr class="hover:bg-gray-50 transition">
+                    <!-- Tanggal -->
+                    <td class="px-6 py-4 text-gray-700 whitespace-nowrap">
+                      {{ trx.date.strftime('%d-%m-%Y') }}
+                    </td>
+
+                    <!-- Jenis -->
+                    <td class="px-6 py-4">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-semibold {% if trx.type == 'income' %} bg-green-100 text-green-700 {% else %} bg-red-100 text-red-700 {% endif %}"
+                      >
+                        {{ 'Pemasukan' if trx.type == 'income' else
+                        'Pengeluaran' }}
+                      </span>
+                    </td>
+
+                    <!-- Nominal -->
+                    <td
+                      class="px-6 py-4 font-mono font-semibold text-gray-800 whitespace-nowrap"
+                    >
+                      Rp {{ "{:,.0f}".format(trx.amount).replace(",", ".") }}
+                    </td>
+
+                    <!-- Deskripsi -->
+                    <td class="px-6 py-4 text-gray-600">
+                      {{ trx.description }}
+                    </td>
+
+                    <!-- Bukti -->
+                    <td class="px-6 py-4">
+                      {% if trx.proof_file %}
+                      <a
+                        href="{{ url_for('transaction.uploaded_file', filename=trx.proof_file) }}"
+                        target="_blank"
+                        class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                      >
+                        <i data-lucide="link" class="w-4 h-4"></i> Lihat
+                      </a>
+                      {% else %}
+                      <span class="text-gray-400">-</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
@@ -213,11 +237,18 @@
 
       // Sidebar toggle
       const sidebar = document.getElementById("sidebar");
-      const mainContent = document.getElementById("mainContent");
+      const backdrop = document.getElementById("backdrop");
       const sidebarToggle = document.getElementById("sidebarToggle");
+
       sidebarToggle.addEventListener("click", () => {
         sidebar.classList.toggle("-translate-x-64");
-        mainContent.classList.toggle("ml-64");
+        backdrop.classList.toggle("hidden");
+      });
+
+      // Klik backdrop untuk menutup sidebar
+      backdrop.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-64");
+        backdrop.classList.add("hidden");
       });
 
       // Load Lucide icons
