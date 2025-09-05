@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Transaksi | Finance Tracker</title>
+    <title>Profil | Finance Tracker</title>
     <link
       rel="icon"
       href="{{ url_for('static', filename='favicon.png') }}"
@@ -12,9 +12,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-      body {
-        overflow-x: hidden; /* Hilangkan scroll horizontal pada body */
-      }
       .menu-item {
         transition: all 0.3s ease;
       }
@@ -54,9 +51,15 @@
           </a>
           <a
             href="/transactions"
-            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3 bg-gray-800"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3"
           >
             <i data-lucide="wallet"></i> Transaksi
+          </a>
+          <a
+            href="/profile"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3 bg-gray-800"
+          >
+            <i data-lucide="user"></i> Profile
           </a>
           <a
             href="#"
@@ -90,9 +93,7 @@
             <i data-lucide="menu" class="w-6 h-6"></i>
           </button>
 
-          <h1 class="mx-auto text-lg font-bold text-gray-800">
-            Dashboard Finance Tracker
-          </h1>
+          <h1 class="mx-auto text-lg font-bold text-gray-800">Edit Profil</h1>
 
           <!-- Avatar -->
           <div class="relative">
@@ -130,99 +131,71 @@
 
         <!-- Content -->
         <div class="flex-1 p-8 overflow-y-auto">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Transaksi</h1>
-            <a
-              href="{{ url_for('transaction.add_transaction') }}"
-              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              + Tambah Transaksi
-            </a>
-          </div>
-
-          <!-- Table Card -->
-          <div class="bg-white shadow-md rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-sm text-left">
-                <thead class="bg-gray-50 border-b">
-                  <tr>
-                    <th
-                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
-                    >
-                      Tanggal
-                    </th>
-                    <th
-                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
-                    >
-                      Jenis
-                    </th>
-                    <th
-                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
-                    >
-                      Nominal
-                    </th>
-                    <th
-                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
-                    >
-                      Deskripsi
-                    </th>
-                    <th
-                      class="px-6 py-3 font-semibold text-gray-600 uppercase tracking-wider"
-                    >
-                      Bukti
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                  {% for trx in transactions %}
-                  <tr class="hover:bg-gray-50 transition">
-                    <!-- Tanggal -->
-                    <td class="px-6 py-4 text-gray-700 whitespace-nowrap">
-                      {{ trx.date.strftime('%d-%m-%Y') }}
-                    </td>
-
-                    <!-- Jenis -->
-                    <td class="px-6 py-4">
-                      <span
-                        class="px-3 py-1 rounded-full text-xs font-semibold {% if trx.type == 'income' %} bg-green-100 text-green-700 {% else %} bg-red-100 text-red-700 {% endif %}"
-                      >
-                        {{ 'Pemasukan' if trx.type == 'income' else
-                        'Pengeluaran' }}
-                      </span>
-                    </td>
-
-                    <!-- Nominal -->
-                    <td
-                      class="px-6 py-4 font-mono font-semibold text-gray-800 whitespace-nowrap"
-                    >
-                      Rp {{ "{:,.0f}".format(trx.amount).replace(",", ".") }}
-                    </td>
-
-                    <!-- Deskripsi -->
-                    <td class="px-6 py-4 text-gray-600">
-                      {{ trx.description }}
-                    </td>
-
-                    <!-- Bukti -->
-                    <td class="px-6 py-4">
-                      {% if trx.proof_file %}
-                      <a
-                        href="{{ url_for('transaction.uploaded_file', filename=trx.proof_file) }}"
-                        target="_blank"
-                        class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                      >
-                        <i data-lucide="link" class="w-4 h-4"></i> Lihat
-                      </a>
-                      {% else %}
-                      <span class="text-gray-400">-</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+          <form
+            action=""
+            method="POST"
+            enctype="multipart/form-data"
+            class="bg-white p-6 rounded-xl shadow space-y-4 max-w-xl mx-auto"
+          >
+            <!-- Avatar -->
+            <div class="flex items-center gap-4">
+              <img
+                src="{{ url_for('static', filename=user.image) if user.image else url_for('static', filename='default-avatar.png') }}"
+                alt="Avatar"
+                class="w-20 h-20 rounded-full object-cover border"
+              />
+              <input
+                type="file"
+                name="avatar"
+                accept="image/*"
+                class="text-sm text-gray-600"
+              />
             </div>
-          </div>
+
+            <!-- Name -->
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Nama</label>
+              <input
+                type="text"
+                name="name"
+                value="{{ user.name }}"
+                required
+                class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-green-200"
+              />
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                value="{{ user.email }}"
+                required
+                class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-green-200"
+              />
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label class="block text-gray-700 font-medium mb-1"
+                >Password (opsional)</label
+              >
+              <input
+                type="password"
+                name="password"
+                class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-green-200"
+                placeholder="Kosongkan jika tidak ingin mengganti"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              Simpan Perubahan
+            </button>
+          </form>
         </div>
       </main>
     </div>
@@ -245,7 +218,6 @@
         backdrop.classList.toggle("hidden");
       });
 
-      // Klik backdrop untuk menutup sidebar
       backdrop.addEventListener("click", () => {
         sidebar.classList.add("-translate-x-64");
         backdrop.classList.add("hidden");

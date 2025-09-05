@@ -5,6 +5,7 @@ from database import Base, engine
 # from models import User
 from routes import init_auth_routes
 from routes.transaction_routes import transaction_bp   
+from routes.profile_routes import profile_bp
 # from .utils import allowed_file
 
 import os
@@ -19,7 +20,7 @@ def create_app():
 
     # Register blueprint
     app.register_blueprint(transaction_bp) 
-
+    app.register_blueprint(profile_bp)
     db.init_app(app)
     init_auth_routes(app, db)
 
