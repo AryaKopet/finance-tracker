@@ -97,6 +97,9 @@ def init_auth_routes(app, db):
 
         db = SessionLocal()
         user_id = session["user_id"]
+        
+        # 🔹 Ambil data user langsung dari database
+        user = db.query(User).get(user_id)
 
         # Ambil filter bulan & tahun dari query params
         month = request.args.get("month", type=int)
@@ -121,6 +124,7 @@ def init_auth_routes(app, db):
 
         return render_template(
             "index.html",
+            user=user,
             username=session.get("username"),
             user_image=session.get("user_image"),
             total_income=total_income,
