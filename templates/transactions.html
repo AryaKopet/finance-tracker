@@ -50,7 +50,7 @@
             href="/dashboard"
             class="menu-item px-3 py-2 rounded-lg flex items-center gap-3"
           >
-            <i data-lucide="home"></i> Dashboard
+            <i data-lucide="gauge"></i> Dashboard
           </a>
           <a
             href="/transactions"
@@ -59,10 +59,16 @@
             <i data-lucide="wallet"></i> Transaksi
           </a>
           <a
-            href="#"
+            href="/profile"
             class="menu-item px-3 py-2 rounded-lg flex items-center gap-3"
           >
-            <i data-lucide="settings"></i> Pengaturan
+            <i data-lucide="user-round-pen"></i> Profile
+          </a>
+          <a
+            href="{{ url_for('export.export') }}"
+            class="menu-item px-3 py-2 rounded-lg flex items-center gap-3"
+          >
+            <i data-lucide="download"></i> Export / Cetak
           </a>
         </nav>
       </aside>
@@ -91,7 +97,7 @@
           </button>
 
           <h1 class="mx-auto text-lg font-bold text-gray-800">
-            Dashboard Finance Tracker
+            Transaksi Pemasukan dan Pengeluaran
           </h1>
 
           <!-- Avatar -->
@@ -112,12 +118,6 @@
               id="dropdownMenu"
               class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg hidden"
             >
-              <a
-                href="/profile"
-                class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-gray-700"
-              >
-                <i data-lucide="user" class="w-4 h-4"></i> Profil
-              </a>
               <a
                 href="{{ url_for('logout') }}"
                 class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-red-500"
