@@ -224,6 +224,37 @@
             </div>
           </div>
 
+          <!-- Insight Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-10">
+            <!-- Pemasukan Insight -->
+            <div class="bg-white shadow-md rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                <i data-lucide="arrow-down-circle" class="w-5 h-5 text-blue-600"></i> Pemasukan Bulan Ini
+              </h3>
+              <p class="text-2xl font-bold text-blue-600 mt-2">
+                Rp {{ "{:,.0f}".format(total_income) }}
+              </p>
+              <p class="mt-1 text-sm {% if income_change >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if income_change >= 0 %} ↑ {{ income_change }}% {% else %} ↓ {{ income_change|abs }}% {% endif %}
+                dibanding bulan lalu
+              </p>
+            </div>
+
+            <!-- Pengeluaran Insight -->
+            <div class="bg-white shadow-md rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                <i data-lucide="arrow-up-circle" class="w-5 h-5 text-red-600"></i> Pengeluaran Bulan Ini
+              </h3>
+              <p class="text-2xl font-bold text-red-600 mt-2">
+                Rp {{ "{:,.0f}".format(total_expense) }}
+              </p>
+              <p class="mt-1 text-sm {% if expense_change <= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if expense_change >= 0 %} ↑ {{ expense_change }}% {% else %} ↓ {{ expense_change|abs }}% {% endif %}
+                dibanding bulan lalu
+              </p>
+            </div>
+          </div>
+
           <!-- Chart -->
           <div class="bg-white shadow-md rounded-lg p-6 mt-10">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">

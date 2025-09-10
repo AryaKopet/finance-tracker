@@ -3,7 +3,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 from models import Transaction
 from database import SessionLocal
-from sqlalchemy import extract
+from datetime import datetime
+from sqlalchemy import extract, func
 
 def init_auth_routes(app, db):
     # =========================
@@ -28,7 +29,7 @@ def init_auth_routes(app, db):
                 return redirect(url_for("register"))
 
             # Validasi panjang password
-            if len(password) < 8:
+            if len(password) < 8:   
                 flash("Password harus minimal 8 karakter!", "error")
                 return redirect(url_for("register"))
 
@@ -98,27 +99,49 @@ def init_auth_routes(app, db):
         db = SessionLocal()
         user_id = session["user_id"]
         
-        # 🔹 Ambil data user langsung dari database
         user = db.query(User).get(user_id)
 
-        # Ambil filter bulan & tahun dari query params
+        # Ambil filter bulan & tahun
         month = request.args.get("month", type=int)
         year = request.args.get("year", type=int)
 
-        query = db.query(Transaction).filter_by(user_id=user_id)
+        now = datetime.now()
+        if not month:
+            month = now.month
+        if not year:
+            year = now.year
 
-        if month and year:
-            query = query.filter(
-                extract("month", Transaction.date) == month,
-                extract("year", Transaction.date) == year
-            )
-
-        transactions = query.all()
-
-        # Hitung total pemasukan & pengeluaran
-        total_income = sum([t.amount for t in transactions if t.type == "income"])
-        total_expense = sum([t.amount for t in transactions if t.type == "expense"])
+        # 🔹 Data bulan ini
+        query_this = db.query(Transaction).filter(
+            Transaction.user_id == user_id,
+            extract("month", Transaction.date) == month,
+            extract("year", Transaction.date) == year,
+        )
+        transactions_this = query_this.all()
+        total_income = sum(t.amount for t in transactions_this if t.type == "income")
+        total_expense = sum(t.amount for t in transactions_this if t.type == "expense")
         total_balance = total_income - total_expense
+
+        # 🔹 Data bulan lalu
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        query_prev = db.query(Transaction).filter(
+            Transaction.user_id == user_id,
+            extract("month", Transaction.date) == prev_month,
+            extract("year", Transaction.date) == prev_year,
+        )
+        transactions_prev = query_prev.all()
+        prev_income = sum(t.amount for t in transactions_prev if t.type == "income")
+        prev_expense = sum(t.amount for t in transactions_prev if t.type == "expense")
+
+        # 🔹 Hitung persentase perubahan
+        def calc_change(curr, prev):
+            if prev == 0:
+                return 100 if curr > 0 else 0
+            return round(((curr - prev) / prev) * 100, 1)
+
+        income_change = calc_change(total_income, prev_income)
+        expense_change = calc_change(total_expense, prev_expense)
 
         db.close()
 
@@ -130,6 +153,8 @@ def init_auth_routes(app, db):
             total_income=total_income,
             total_expense=total_expense,
             total_balance=total_balance,
+            income_change=income_change,
+            expense_change=expense_change,
             selected_month=month,
             selected_year=year,
         )
